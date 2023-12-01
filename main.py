@@ -4,82 +4,113 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from selenium.webdriver import ActionChains
+from selenium.webdriver.chrome.options import Options
 import time
-import datetime
+from datetime import datetime, timedelta
 
-__pwd__ = "YourPWD"
-__email__ = "YourEMAIL"
-seat_name = "NameOfSeat"
-faculty = "YourFaculty"
+# Login data
+# __pwd__: Password
+# __main__: uzh mail
+__pwd__ = "PWD"
+__mail__ = "name.surname@uzh.ch"
+# List of seats that should be tried
+__plaetze__ = ["preferred seat", "alternative seat"]
+# The faculty you are part of
+__fakultaet__ = "Faculty"
+# A logging file that makes life easier for you
+__log__ = "UB-Logs.txt"
+__repeat__ = True
 
-driver = webdriver.Chrome()
+# [Settings for development]
+# Do not touch if not developing
+__DEV__ = False
+
+if __DEV__:
+    headless = input("headless? y/n")
+    if headless == "y":
+        options = Options()
+        options.add_argument("--headless=new")
+        driver = webdriver.Chrome(options=options)
+    elif headless == "n":
+        driver = webdriver.Chrome()
+    else:
+        raise Warning("Invalid value for headless")
+else:
+    options = Options()
+    options.add_argument("--headless=new")
+    driver = webdriver.Chrome(options=options)
+# [/Settings for development]
 
 # Reservation Time:
-curr = datetime.datetime.now()
-month = curr.month
+reservation_time = datetime.now() + timedelta(days=7)
 
-now_time = datetime.datetime.now().time()
-
-# Date for next week
-# Careful! Special case if +7 days is greater than max days of month not implemented
-
-if datetime.time(20, 0) <= now_time <= datetime.time(23, 59, 59):
-    day = curr.day + 8
-elif datetime.time(0, 0) <= now_time <= datetime.time(7, 59, 59):
-    day = curr.day + 7
-else:
-    day = curr.day + 7
-
-
-__URL__ = "https://hbzwwws005.uzh.ch/booked-ubzh/Web/schedule.php?&clearFilter=1&sid=21&sd=2023-"+str(month)+"-"+str(day)
+# Building the URL
+__URL__ = f"https://hbzwwws005.uzh.ch/booked-ubzh/Web/schedule.php?&clearFilter=1&sid=21&sd=2023-{reservation_time.month}-{reservation_time.day}"
 # UB-nw: sid=21
-driver.get(__URL__)
 
-# Login
-# name: id="email" pwd: id="password"
-# + Keys.ENTER
-driver.find_element(By.ID, "email").send_keys(__email__)
-driver.find_element(By.ID, "password").send_keys(__pwd__ + Keys.ENTER)
+while __repeat__:
+    if len(__plaetze__) == 0:
+        log = open(__log__, "a")
+        log.write(datetime.now().strftime("%H:%M:%S") + f": failed, Alle plätze getestet, for {__mail__} day: " + str(reservation_time.day) + ". \n")
+        break
 
-# Find a seat && open page of seat
-driver.find_element(By.LINK_TEXT, seat_name).send_keys(Keys.ENTER)
+    driver.get(__URL__)
 
-# select time
-select_time = driver.find_element(By.NAME, "endPeriod")
-selectEnd = Select(select_time)
-selectEnd.select_by_value("18:00:00")
+    # Login
+    # + Keys.ENTER
+    try:
+        driver.find_element(By.ID, "email").send_keys(__mail__)
+        driver.find_element(By.ID, "password").send_keys(__pwd__ + Keys.ENTER)
+    except:
+        pass
+    finally:
+        # Find a seat && open page of seat
+        driver.find_element(By.LINK_TEXT, __plaetze__[0]).send_keys(Keys.ENTER)
 
-# select Faculty
-select_faculty = driver.find_element(By.NAME, "psiattribute[5]")
-selectFaculty = Select(select_faculty)
-selectFaculty.select_by_value(faculty)
+    # select end time of reservation
+    select_time = driver.find_element(By.NAME, "endPeriod")
+    selectEnd = Select(select_time)
+    selectEnd.select_by_value("18:00:00")
 
-# accept Nutzerbedingung
-terms_conditions = driver.find_element(By.ID, 'termsAndConditionsAcknowledgement')
-ActionChains(driver)\
-        .click(terms_conditions)\
-        .perform()
+    # buffer
+    time.sleep(2)
+    # select Faculty
+    select_faculty = driver.find_element(By.ID, "psiattribute5")
+    selectFaculty = Select(select_faculty)
+    selectFaculty.select_by_value("WWF")
 
-time.sleep(3)
+    # accept Nutzerbedingung
+    terms_conditions = driver.find_element(By.ID, 'termsAndConditionsAcknowledgement')
+    ActionChains(driver)\
+            .click(terms_conditions)\
+            .perform()
 
-# click Anlegen button
-anlegen = driver.find_element(By.CLASS_NAME, 'btn-success')
-ActionChains(driver)\
-        .click(anlegen)\
-        .perform()
+    # buffer
+    time.sleep(2)
 
-# Log file
-log = open("UB-Logs.txt", "a")
-n = datetime.datetime.now()
-ts = n.strftime("%H:%M:%S")
+    # click Anlegen button
+    anlegen = driver.find_element(By.CLASS_NAME, 'btn-success')
+    ActionChains(driver)\
+            .click(anlegen)\
+            .perform()
 
-time.sleep(2)
+    # buffer
+    time.sleep(2)
 
-if(driver.find_element(By.ID, 'reservation-failed')):
-    log.write(ts + ": failed")
-else:
-    log.write(ts + ": success -> booked... 127")
+    log = open(__log__, "a")
+    n = datetime.now()
+    ts = n.strftime("%H:%M:%S")
 
+    time.sleep(2)
+    # Logging
+    try:
+        if(driver.find_element(By.ID, 'reservation-created')):
+            log.write(ts + f": success -> booked... {__plaetze__[0]}, for {__mail__} at " + str(reservation_time.day) + ". \n")
+            __repeat__ = False
+    except:
+        log.write(ts + f": failed, {__plaetze__[0]}, for {__mail__} at " + str(reservation_time.day) + ". \n")
+        __plaetze__ = __plaetze__[1::]
+
+# close everything and exit code
 log.close()
-
 driver.quit()

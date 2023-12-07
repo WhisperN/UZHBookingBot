@@ -19,7 +19,6 @@ __plaetze__ = ["preferred seat", "alternative seat"]
 __fakultaet__ = "Faculty"
 # A logging file that makes life easier for you
 __log__ = "UB-Logs.txt"
-__repeat__ = True
 
 # [Settings for development]
 # Do not touch if not developing
@@ -48,7 +47,9 @@ reservation_time = datetime.now() + timedelta(days=7)
 __URL__ = f"https://hbzwwws005.uzh.ch/booked-ubzh/Web/schedule.php?&clearFilter=1&sid=21&sd=2023-{reservation_time.month}-{reservation_time.day}"
 # UB-nw: sid=21
 
-while __repeat__:
+log = open(__log__, "a")
+
+while True:
     if len(__plaetze__) == 0:
         log = open(__log__, "a")
         log.write(datetime.now().strftime("%H:%M:%S") + f": failed, Alle plätze getestet, for {__mail__} day: " + str(reservation_time.day) + ". \n")
@@ -97,7 +98,6 @@ while __repeat__:
     # buffer
     time.sleep(2)
 
-    log = open(__log__, "a")
     n = datetime.now()
     ts = n.strftime("%H:%M:%S")
 
@@ -106,7 +106,7 @@ while __repeat__:
     try:
         if(driver.find_element(By.ID, 'reservation-created')):
             log.write(ts + f": success -> booked... {__plaetze__[0]}, for {__mail__} at " + str(reservation_time.day) + ". \n")
-            __repeat__ = False
+            break
     except:
         log.write(ts + f": failed, {__plaetze__[0]}, for {__mail__} at " + str(reservation_time.day) + ". \n")
         __plaetze__ = __plaetze__[1::]

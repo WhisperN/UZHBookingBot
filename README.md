@@ -24,9 +24,28 @@ Chrome from the official [site](https://www.google.de/chrome/?brand=YTUH&gclid=C
 ### Implementation
 
 **Setup variables**
-
+Example:
 ```
 __pwd__ = Password
 __mail__ = name@uzh.ch
 ```
+Read the comments in the code for further variables that need to be set.
 
+### Setting up a Cronjob
+
+```
+crontab -e
+```
+
+On the end of the file add the following code:
+```
+0 6 * * * sh /path/to/ubbookedbot/main.sh >> /path/to/ubbookedbot/UB-Cron-Log.txt 2>&1
+```
+
+This will make the main.sh code run every day at 6:00 am. For security and implementation reasons I created a main.sh file that can run the main.py file using the following command:
+```
+python3 /path/to/ubbookedbot/main.py
+```
+
+
+DO NOT SAVE THE main.sh IN THE HOME DIRECTORY. The home directory is encrypted as soon as you logout of your machine.

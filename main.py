@@ -13,11 +13,11 @@ from datetime import datetime, timedelta
 # __main__: uzh mail
 __pwd__ = "PWD"
 __mail__ = "name.surname@uzh.ch"
-# List of seats that should be tried
+# List of seats that should be tried (i.e. [f"Y15/1{i}" for i in range(15, 27)])
 __plaetze__ = ["preferred seat", "alternative seat"]
-# The faculty you are part of
+# The faculty you are part of (i.e. WWF, MNF )
 __fakultaet__ = "Faculty"
-# A logging file that makes life easier for you
+# A logging file that makes life easier for you (Optional)
 __log__ = "UB-Logs.txt"
 
 # [Settings for development]

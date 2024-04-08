@@ -44,7 +44,8 @@ else:
 reservation_time = datetime.now() + timedelta(days=7)
 
 # Building the URL
-__URL__ = f"https://hbzwwws005.uzh.ch/booked-ubzh/Web/schedule.php?&clearFilter=1&sid=21&sd=2023-{reservation_time.month}-{reservation_time.day}"
+# IMPORTANT: YEAR IS HARD CODED! INCOMMING BUG
+__URL__ = f"https://hbzwwws005.uzh.ch/booked-ubzh/Web/schedule.php?&clearFilter=1&sid=21&sd=2024-{reservation_time.month}-{reservation_time.day}"
 # UB-nw: sid=21
 
 log = open(__log__, "a")

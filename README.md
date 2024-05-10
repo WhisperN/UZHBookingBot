@@ -1,5 +1,9 @@
 # Booking bot for UB @UZH
 
+If you are not familiar with scheduled tasks and programming in general. Ask me to host the bot for you: nilsjosef.jacobi@uzh.ch
+
+If you like my work [buy my a coffee](https://buymeacoffe.com/nilsjosefjacobi)
+
 ### Functionality
 This is a bot that books a seat in a UB library for a given place, library and time (as defined in the moment of execution via cronjob).
 ### requirements

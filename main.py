@@ -26,37 +26,10 @@ __startTime__ = "08:00:00"
 # End time of reservation
 __endTime__ = "17:00:00"
 
-# [Settings for development]
-# Do not touch if not developing
-__DEV__ = False
-
-if __DEV__:
-    headless = input("headless? y/n")
-    if headless == "y":
-        options = Options()
-        options.add_argument("--headless=new")
-        driver = webdriver.Chrome(options=options)
-    elif headless == "n":
-        driver = webdriver.Chrome()
-    else:
-        raise Warning("Invalid value for headless")
-else:
-    options = Options()
-    options.add_argument("--headless=new")
-    driver = webdriver.Chrome(options=options)
-# [/Settings for development]
-
-# Reservation Time:
-reservation_time = datetime.now() + timedelta(days=7)
-
-# Building the URL
-# IMPORTANT: YEAR IS HARD CODED! INCOMMING BUG
-__URL__ = f"https://hbzwwws005.uzh.ch/booked-ubzh/Web/schedule.php?&clearFilter=1&sid=21&sd=2024-{reservation_time.month}-{reservation_time.day}"
-# UB-nw: sid=21
-
 log = open(__log__, "a")
 
 # Settings for development
+# <dev>
 __DEV__ = True
 
 if __DEV__:
@@ -78,6 +51,7 @@ else:
     options.add_argument("--remote-debugging-port=9222")
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
+# </dev>
 
 # Reservation Time:
 reservation_time = datetime.now() + timedelta(days=7)
@@ -91,6 +65,8 @@ while __repeat__:
         log.write(datetime.now().strftime("%H:%M:%S") + f": failed, Alle plätze getestet, for {__mail__} day: " + str(reservation_time.day) + ". \n")
         break
 
+    # Buiding the URL
+    # YEAR IS CURRENTLY HARD CODED. BUG!
     __URL__ = f"https://hbzwwws005.uzh.ch/booked-ubzh/Web/reservation.php?rid={__plaetze__[0]}&sid=21&rd=2025-{reservation_time.month}-{reservation_time.day}"
 
     driver.get(__URL__)
